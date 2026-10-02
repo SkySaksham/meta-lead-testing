@@ -2,12 +2,16 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Query, HTTPException
 from fastapi.responses import PlainTextResponse,HTMLResponse
+import requests
 
 load_dotenv()
 
 app = FastAPI()
 
 VERIFY_TOKEN = os.getenv("META_VERIFY_TOKEN")
+META_GRAPH_URL = "https://graph.facebook.com/v26.0"
+META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN")
+
 
 @app.get("/")
 async def health():
@@ -34,11 +38,41 @@ async def verify(
 
 @app.post("/leads")
 async def leads(request: Request):
-    body = await request.body()
     js = await request.json()
 
-    print(body)
-    print(js)
+    
+    leadgen_id = (
+        js["entry"][0]["changes"][0]["value"]["leadgen_id"]
+    )
+
+    print("Leadgen ID:", leadgen_id)
+
+    
+    url = f"{META_GRAPH_URL}/{leadgen_id}"
+
+    response = requests.get(
+        url,
+        params={
+            "access_token": META_ACCESS_TOKEN
+        }
+    )
+
+    print("Meta status:", response.status_code)
+    print("Meta response:", response.json())
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.json()
+        )
+
+    lead_data = response.json()
+
+    return {
+        "status": "success",
+        "leadgen_id": leadgen_id,
+        "lead": lead_data
+    }
 
 
 @app.get("/privacy", response_class=HTMLResponse)
