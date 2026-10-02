@@ -1,17 +1,31 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query, HTTPException
 
 app = FastAPI()
 
 
-@app.get("/health")
+@app.get("/")
 async def health():
-    return {"status":"UP"}
+    return {"status": "UP"}
+
+
+@app.get("/leads")
+async def verify(
+    challenge: str = Query(..., alias="hub.challenge")
+):
+    if challenge:
+        print(challenge)
+        return challenge
+
+    raise HTTPException(
+        status_code=400,
+        detail="Missing challenge"
+    )
 
 
 @app.post("/leads")
 async def leads(request: Request):
-    body = request.body()
-    js = request.json()
+    body = await request.body()
+    js = await request.json()
 
     print(body)
     print(js)
