@@ -37,6 +37,7 @@ def get_lead_details(leadgen_id: str) -> dict:
     }
 
     return {
+        "leadgen_id": leadgen_id,
         "name": fields.get("full_name"),
         "phone": fields.get("phone_number"),
         "email": fields.get("email"),

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 export type Lead = {
+  leadgen_id: string;
   name: string;
   phone: string;
   email: string;
