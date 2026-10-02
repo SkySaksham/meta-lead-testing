@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Query, HTTPException
 from fastapi.responses import PlainTextResponse,HTMLResponse
 import requests
+from lead_utils import get_lead_details
 
 load_dotenv()
 
@@ -40,40 +41,24 @@ async def verify(
 async def leads(request: Request):
     js = await request.json()
 
-    
     leadgen_id = (
         js["entry"][0]["changes"][0]["value"]["leadgen_id"]
     )
 
     print("Leadgen ID:", leadgen_id)
 
-    
-    url = f"{META_GRAPH_URL}/{leadgen_id}"
+    lead = get_lead_details(leadgen_id)
 
-    response = requests.get(
-        url,
-        params={
-            "access_token": META_ACCESS_TOKEN
-        }
-    )
-
-    print("Meta status:", response.status_code)
-    print("Meta response:", response.json())
-
-    if response.status_code != 200:
+    if lead is None:
         raise HTTPException(
-            status_code=response.status_code,
-            detail=response.json()
+            status_code=502,
+            detail="Failed to fetch lead from Meta"
         )
 
-    lead_data = response.json()
+    print("LEAD DATA:")
+    print(lead)
 
-    return {
-        "status": "success",
-        "leadgen_id": leadgen_id,
-        "lead": lead_data
-    }
-
+    return {"status": "ok"}
 
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
