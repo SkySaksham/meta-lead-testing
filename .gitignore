@@ -1,30 +1,37 @@
-# Python
+# =========================
+# Python / FastAPI
+# =========================
+
 __pycache__/
 *.py[cod]
-*.pyo
 
-# Virtual environment
+# Environment variables / secrets
+.env
+
+# Virtual environments
 .venv/
 venv/
 env/
 
-# Environment variables / secrets
-.env
-.env.*
-!.env.example
+# =========================
+# Node / React Native / Expo
+# =========================
 
-# IDE
-.vscode/
-.idea/
+node_modules/
 
-# OS
+.expo/
+.expo-shared/
+
+# Expo / React Native build output
+dist/
+web-build/
+
+# =========================
+# OS / Editor
+# =========================
+
 .DS_Store
 Thumbs.db
 
-# Testing / coverage
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Logs
-*.log
+.vscode/
+.idea/

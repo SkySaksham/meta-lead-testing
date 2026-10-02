@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Query, HTTPException
+from fastapi import FastAPI, Request, Query, HTTPException, WebSocket
 from fastapi.responses import PlainTextResponse,HTMLResponse
 import requests
 from lead_utils import get_lead_details
@@ -12,6 +12,12 @@ app = FastAPI()
 VERIFY_TOKEN = os.getenv("META_VERIFY_TOKEN")
 META_GRAPH_URL = "https://graph.facebook.com/v26.0"
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN")
+
+
+
+WEBSOCKET_SECRET = os.getenv("WEBSOCKET_SECRET")
+active_connection: WebSocket | None = None
+
 
 
 @app.get("/")
@@ -59,6 +65,32 @@ async def leads(request: Request):
     print(lead)
 
     return {"status": "ok"}
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(
+    websocket: WebSocket,
+    token: str,
+):
+    global active_connection
+
+    if token != WEBSOCKET_SECRET:
+        await websocket.close(code=1008)
+        return
+
+    if active_connection is not None:
+        await websocket.close(code=1008)
+        return
+
+    await websocket.accept()
+    active_connection = websocket
+
+    try:
+        while True:
+            await websocket.receive_text()
+
+    except Exception:
+        active_connection = None
 
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
