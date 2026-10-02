@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LeadWebSocket } from '../services/LeadWebSocket';
+import LeadDisplay from '../components/LeadDisplay';
 
 export default function LeadScreen() {
   useEffect(() => {
@@ -20,7 +21,8 @@ export default function LeadScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Leads</Text>
-      <Text>No leads yet</Text>
+
+      <LeadDisplay />
     </View>
   );
 }
@@ -35,6 +37,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
   },
 });

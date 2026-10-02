@@ -45,6 +45,8 @@ async def verify(
 
 @app.post("/leads")
 async def leads(request: Request):
+    global active_connection
+
     js = await request.json()
 
     leadgen_id = (
@@ -63,6 +65,14 @@ async def leads(request: Request):
 
     print("LEAD DATA:")
     print(lead)
+
+    if active_connection is not None:
+        try:
+            await active_connection.send_json(lead)
+            print("Lead sent through WebSocket")
+        except Exception as e:
+            print("Failed to send lead:", e)
+            active_connection = None
 
     return {"status": "ok"}
 
@@ -85,13 +95,14 @@ async def websocket_endpoint(
     await websocket.accept()
     active_connection = websocket
 
+    print("WebSocket connected")
+
     try:
         while True:
             await websocket.receive_text()
-
-    except Exception:
+    finally:
         active_connection = None
-
+        print("WebSocket disconnected")
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
     return """

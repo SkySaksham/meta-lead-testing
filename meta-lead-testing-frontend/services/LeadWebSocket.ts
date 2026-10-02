@@ -1,3 +1,5 @@
+import { useStore } from '../store/store';
+
 export class LeadWebSocket {
   private socket: WebSocket | null = null;
 
@@ -11,7 +13,11 @@ export class LeadWebSocket {
     };
 
     this.socket.onmessage = (event) => {
-      console.log('Message received:', event.data);
+      const lead = JSON.parse(event.data);
+
+      console.log('Lead received:', lead);
+
+      useStore.getState().addLead(lead);
     };
 
     this.socket.onerror = (error) => {
