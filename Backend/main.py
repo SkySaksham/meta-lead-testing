@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Query, HTTPException
+from fastapi.responses import PlainTextResponse
 
 load_dotenv()
 
@@ -24,7 +25,7 @@ async def verify(
     print("CHALLENGE:", challenge)
 
     if mode == "subscribe" and verify_token == VERIFY_TOKEN:
-        return challenge
+        return PlainTextResponse(challenge)
 
     raise HTTPException(
         status_code=403,
