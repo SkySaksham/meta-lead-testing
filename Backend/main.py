@@ -1,7 +1,12 @@
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Query, HTTPException
+
+load_dotenv()
 
 app = FastAPI()
 
+VERIFY_TOKEN = os.getenv("META_VERIFY_TOKEN")
 
 @app.get("/")
 async def health():
@@ -10,17 +15,21 @@ async def health():
 
 @app.get("/leads")
 async def verify(
-    challenge: str = Query(..., alias="hub.challenge")
+    mode: str = Query(None, alias="hub.mode"),
+    verify_token: str = Query(None, alias="hub.verify_token"),
+    challenge: str = Query(None, alias="hub.challenge"),
 ):
-    if challenge:
-        print(challenge)
+    print("MODE:", mode)
+    print("VERIFY TOKEN:", verify_token)
+    print("CHALLENGE:", challenge)
+
+    if mode == "subscribe" and verify_token == VERIFY_TOKEN:
         return challenge
 
     raise HTTPException(
-        status_code=400,
-        detail="Missing challenge"
+        status_code=403,
+        detail="Verification failed"
     )
-
 
 @app.post("/leads")
 async def leads(request: Request):
